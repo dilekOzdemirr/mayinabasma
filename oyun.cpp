@@ -155,7 +155,7 @@ void vectorTemizle() {
     }
 }
 
-int main()
+int main2()
 {
     InitWindow(GENISLIK, YUKSEKLIK, "Uçak Oyunu");
     SetTargetFPS(60);
