@@ -17,11 +17,19 @@ float timer = 0.0f;
 enum GameState { MENU, OYUN, OYUN_BITTI };
 GameState gameState = MENU;
 
+// Oyuncu değişkenleri
+Vector2 oyuncuPozisyon = {0, size - 1};  // Sol alt köşe
+int can = 5;
+bool oyuncuKazandi = false;
+
 
 // Yeni oyun başlat
 void YeniOyunBaslat() {
-    oyunBitti = false;
+   oyunBitti = false;
     timer = 0.0f;
+    can = 5;
+    oyuncuKazandi = false;
+    oyuncuPozisyon = {0, size - 1};
 
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++) {
@@ -56,7 +64,7 @@ int main() {
 
         if (gameState == MENU) {
             // Ana ekran
-            DrawText("Mayin Tarlası", SCREEN_WIDTH / 2 - MeasureText("Mayin Tarlasi", 30) / 2, 150, 30, DARKBLUE);
+            DrawText("Mayin Tarlasi", SCREEN_WIDTH / 2 - MeasureText("Mayin Tarlasi", 30) / 2, 150, 30, DARKBLUE);
             DrawRectangleRec(baslaButonu, LIGHTGRAY);
             DrawText("Basla", SCREEN_WIDTH / 2 - MeasureText("Basla", 20) / 2, SCREEN_HEIGHT / 2.0f + 10, 20, BLACK);
 
@@ -70,23 +78,37 @@ int main() {
             }
 
         } else if (gameState == OYUN) {
-            // Oyun ekranı
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !oyunBitti) {
-                int mouseX = GetMouseX();
-                int mouseY = GetMouseY();
-                int row = mouseY / cellSize;
-                int col = mouseX / cellSize;
+            // Oyuncu hareketi ve mayın kontrolü
+            if (!oyunBitti && !oyuncuKazandi) {
+                if (IsKeyPressed(KEY_UP) && oyuncuPozisyon.y > 0)
+                    oyuncuPozisyon.y--;
+                else if (IsKeyPressed(KEY_DOWN) && oyuncuPozisyon.y < size - 1)
+                    oyuncuPozisyon.y++;
+                else if (IsKeyPressed(KEY_LEFT) && oyuncuPozisyon.x > 0)
+                    oyuncuPozisyon.x--;
+                else if (IsKeyPressed(KEY_RIGHT) && oyuncuPozisyon.x < size - 1)
+                    oyuncuPozisyon.x++;
 
-                if (row >= 0 && row < size && col >= 0 && col < size) {
-                    acikKutu[row][col] = true;
-                    if (mayinKutu[row][col]) {
+                int row = (int)oyuncuPozisyon.y;
+                int col = (int)oyuncuPozisyon.x;
+
+                acikKutu[row][col] = true;
+
+                if (mayinKutu[row][col]) {
+                    mayinKutu[row][col] = false;
+                    can--;
+                    if (can <= 0) {
                         oyunBitti = true;
                         gameState = OYUN_BITTI;
-
                         for (int i = 0; i < size; i++)
                             for (int j = 0; j < size; j++)
                                 acikKutu[i][j] = true;
                     }
+                }
+
+                if (oyuncuPozisyon.x == size - 1 && oyuncuPozisyon.y == 0) {
+                    oyuncuKazandi = true;
+                    gameState = OYUN_BITTI;
                 }
             }
 
@@ -105,19 +127,30 @@ int main() {
                 }
             }
 
+           // Oyuncuyu çiz
+            DrawRectangle(oyuncuPozisyon.x * cellSize + 10, oyuncuPozisyon.y * cellSize + 10, cellSize - 20, cellSize - 20, BLUE);
+
+            // Can bilgisi
+            DrawText(TextFormat("Can: %d", can), 10, 10, 20, BLACK);
+
+
+
+
+
+
         }else if (gameState == OYUN_BITTI) {
-            // Oyun bitti ekranı
-            DrawText("Mayina Bastiniz!", SCREEN_WIDTH/2 - MeasureText("Mayina Bastiniz!", 30)/2, 150, 30, RED);
-            
-            // Yeniden başlat butonu
+           if (oyuncuKazandi) {
+                DrawText("Tebrikler, Kazandiniz!", SCREEN_WIDTH/2 - MeasureText("Tebrikler, Kazandiniz!", 30)/2, 100, 30, DARKGREEN);
+            } else {
+                DrawText("Mayina Bastiniz!", SCREEN_WIDTH/2 - MeasureText("Mayina Bastiniz!", 30)/2, 100, 30, RED);
+            }
+
             DrawRectangleRec(yenidenButon, LIGHTGRAY);
             DrawText("Yeniden Baslat", SCREEN_WIDTH/2 - MeasureText("Yeniden Baslat", 20)/2, SCREEN_HEIGHT/2 - 20, 20, BLACK);
-            
-            // Çıkış butonu
+
             DrawRectangleRec(cikisButon, LIGHTGRAY);
             DrawText("Cikis", SCREEN_WIDTH/2 - MeasureText("Cikis", 20)/2, SCREEN_HEIGHT/2 + 50, 20, BLACK);
 
-            // Buton kontrolü
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 Vector2 mousePos = GetMousePosition();
                 if (CheckCollisionPointRec(mousePos, yenidenButon)) {
