@@ -1,6 +1,10 @@
 #include <iostream>
 #include "raylib.h"
 #include <ctime>
+Texture2D karakterSprite;
+Rectangle spriteKare;
+Sound patlamaSes;  
+
 using namespace std;
 
 const int SCREEN_WIDTH = 500;
@@ -50,8 +54,17 @@ void YeniOyunBaslat() {
 
 int main() {
        srand(time(0));
+    InitAudioDevice();  
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mayin Tarlasi");
     SetTargetFPS(60);
+    karakterSprite = LoadTexture("george.png");
+    patlamaSes = LoadSound("SFX_Explosion_01.wav");
+
+
+
+     
+    spriteKare = { 0, 0, (float)(karakterSprite.width / 3), (float)(karakterSprite.height / 4) };
 
     Rectangle baslaButonu = { SCREEN_WIDTH / 2.0f - 75, SCREEN_HEIGHT / 2.0f, 150, 50 };
     Rectangle yenidenButon = { SCREEN_WIDTH/2 - 75, SCREEN_HEIGHT/2 - 30, 150, 40 };
@@ -97,6 +110,7 @@ int main() {
                 if (mayinKutu[row][col]) {
                     mayinKutu[row][col] = false;
                     can--;
+                    PlaySound(patlamaSes);
                     if (can <= 0) {
                         oyunBitti = true;
                         gameState = OYUN_BITTI;
@@ -105,7 +119,7 @@ int main() {
                                 acikKutu[i][j] = true;
                     }
                 }
-
+                
                 if (oyuncuPozisyon.x == size - 1 && oyuncuPozisyon.y == 0) {
                     oyuncuKazandi = true;
                     gameState = OYUN_BITTI;
@@ -127,8 +141,9 @@ int main() {
                 }
             }
 
-           // Oyuncuyu çiz
-            DrawRectangle(oyuncuPozisyon.x * cellSize + 10, oyuncuPozisyon.y * cellSize + 10, cellSize - 20, cellSize - 20, BLUE);
+           //
+            DrawTextureRec(karakterSprite, spriteKare, { oyuncuPozisyon.x * cellSize, oyuncuPozisyon.y * cellSize }, WHITE);
+
 
             // Can bilgisi
             DrawText(TextFormat("Can: %d", can), 10, 10, 20, BLACK);
@@ -142,7 +157,7 @@ int main() {
            if (oyuncuKazandi) {
                 DrawText("Tebrikler, Kazandiniz!", SCREEN_WIDTH/2 - MeasureText("Tebrikler, Kazandiniz!", 30)/2, 100, 30, DARKGREEN);
             } else {
-                DrawText("Mayina Bastiniz!", SCREEN_WIDTH/2 - MeasureText("Mayina Bastiniz!", 30)/2, 100, 30, RED);
+                DrawText("CAN BITTI !", SCREEN_WIDTH/2 - MeasureText("Mayina Bastiniz!", 30)/2, 100, 30, RED);
             }
 
             DrawRectangleRec(yenidenButon, LIGHTGRAY);
