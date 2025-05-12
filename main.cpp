@@ -4,6 +4,10 @@
 Texture2D karakterSprite;
 Rectangle spriteKare;
 Sound patlamaSes;  
+Texture2D kupaSprite;
+Texture2D backgroundTexture;
+
+
 
 using namespace std;
 
@@ -60,7 +64,8 @@ int main() {
     SetTargetFPS(60);
     karakterSprite = LoadTexture("george.png");
     patlamaSes = LoadSound("SFX_Explosion_01.wav");
-
+    kupaSprite = LoadTexture("medal_gold.png");
+    backgroundTexture = LoadTexture("djam3-bg.png");
 
 
      
@@ -74,7 +79,10 @@ int main() {
      while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
+        // Görseli ekran boyutuna göre ölçekle
+            float scaleX = (float)SCREEN_WIDTH / backgroundTexture.width;
+            float scaleY = (float)SCREEN_HEIGHT / backgroundTexture.height;
+            DrawTextureEx(backgroundTexture, {0, 0}, 0.0f, scaleX, WHITE);
         if (gameState == MENU) {
             // Ana ekran
             DrawText("Mayin Tarlasi", SCREEN_WIDTH / 2 - MeasureText("Mayin Tarlasi", 30) / 2, 150, 30, DARKBLUE);
@@ -140,6 +148,11 @@ int main() {
                     }
                 }
             }
+            Vector2 position = {(size - 1) * cellSize, 0};
+            float scale = 3.0f; // Büyüklüğü ayarlayabilirsin
+
+            DrawTextureEx(kupaSprite, position, 0.0f, scale, WHITE);
+            
 
            //
             DrawTextureRec(karakterSprite, spriteKare, { oyuncuPozisyon.x * cellSize, oyuncuPozisyon.y * cellSize }, WHITE);
@@ -149,7 +162,7 @@ int main() {
             DrawText(TextFormat("Can: %d", can), 10, 10, 20, BLACK);
 
 
-
+           
 
 
 
@@ -180,7 +193,7 @@ int main() {
 
         EndDrawing();
     }
-
+    UnloadTexture(kupaSprite);
     CloseWindow();
     return 0;
 }
